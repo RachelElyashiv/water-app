@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2.5ל׳ — יומן הידרציה לאבני כליות</title>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700&family=Frank+Ruhl+Libre:wght@700;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F5F9FA; --card:#FFFFFF; --ink:#14313A; --ink-soft:#5B7681;
+    --line:#DCE8EB; --teal:#177687; --teal-soft:#E3F1F4; --water:#4FB3C7;
+    --amber:#C8821F; --amber-soft:#FBF1E0; --good:#2E8B57;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:'Heebo',Arial,sans-serif}
+  .wrap{max-width:460px;margin:0 auto;padding:20px 16px 40px}
+  .brand{font-family:'Frank Ruhl Libre',serif;font-weight:900;font-size:30px}
+  .brand span{color:var(--water)}
+  .header{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:4px}
+  .date{font-size:12px;color:var(--ink-soft)}
+  .subtitle{font-size:12.5px;color:var(--ink-soft);margin-bottom:16px}
+  .tabs{display:flex;gap:6px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:5px;margin-bottom:16px}
+  .tabs button{flex:1;padding:10px 0;border:none;cursor:pointer;background:transparent;color:var(--ink-soft);border-radius:12px;font-weight:600;font-size:14px;font-family:'Heebo',sans-serif;transition:background .2s}
+  .tabs button.active{background:var(--teal);color:#fff}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 18px 16px;margin-bottom:14px}
+  .card h2{font-family:'Frank Ruhl Libre',serif;font-size:18px;font-weight:700;margin:0}
+  .card .sub{font-size:12.5px;color:var(--ink-soft);margin:2px 0 10px}
+  .today-grid{display:flex;align-items:center;gap:18px}
+  .ring-box{position:relative;width:168px;height:168px;flex-shrink:0}
+  .ring-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+  .ring-val{font-family:'Frank Ruhl Libre',serif;font-weight:900;font-size:34px;line-height:1}
+  .ring-goal{font-size:12px;color:var(--ink-soft);margin-top:4px}
+  .ring-done{font-size:12px;color:var(--good);font-weight:600;margin-top:2px}
+  .cups{display:grid;grid-template-columns:1fr 1fr;gap:8px;flex:1}
+  .cups button{padding:12px 4px;border-radius:12px;border:1px solid var(--line);background:var(--teal-soft);cursor:pointer;font-family:'Heebo',sans-serif}
+  .cups .ml{font-weight:700;font-size:15px;color:var(--teal)}
+  .cups .lbl{font-size:11.5px;color:var(--ink-soft)}
+  .undo{margin-top:12px;background:none;border:none;color:var(--ink-soft);font-size:12.5px;cursor:pointer;text-decoration:underline;font-family:'Heebo',sans-serif}
+  .urine{display:flex;gap:5px}
+  .urine button{flex:1;height:52px;border-radius:9px;cursor:pointer;border:1px solid var(--line)}
+  .urine button.sel{border:3px solid var(--teal)}
+  .urine-scale{display:flex;justify-content:space-between;font-size:11.5px;color:var(--ink-soft);margin-top:6px}
+  .urine-msg{margin-top:10px;font-size:13px;font-weight:600}
+  .pain-open{width:100%;padding:12px;border-radius:12px;border:1px dashed var(--amber);background:var(--amber-soft);color:var(--amber);font-weight:700;cursor:pointer;font-size:14px;font-family:'Heebo',sans-serif}
+  .pain-form input[type=range]{width:100%;accent-color:var(--amber)}
+  .pain-form input[type=text]{width:100%;margin-top:10px;padding:10px 12px;border-radius:10px;border:1px solid var(--line);font-family:'Heebo',sans-serif;font-size:13.5px}
+  .pain-actions{display:flex;gap:8px;margin-top:10px}
+  .btn-amber{flex:1;padding:10px;border-radius:10px;border:none;background:var(--amber);color:#fff;font-weight:700;cursor:pointer;font-family:'Heebo',sans-serif}
+  .btn-ghost{padding:10px 14px;border-radius:10px;border:1px solid var(--line);background:#fff;color:var(--ink-soft);cursor:pointer;font-family:'Heebo',sans-serif}
+  .pain-note{margin-top:10px;font-size:12.5px;color:var(--ink-soft)}
+  .chart{position:relative;height:170px;display:flex;align-items:flex-end;gap:8px;padding-top:8px}
+  .goal-line{position:absolute;right:0;left:0;border-top:2px dashed var(--amber);opacity:.55}
+  .bar-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px}
+  .bar-val{font-size:10.5px;color:var(--ink-soft);min-height:13px}
+  .bar{width:100%;border-radius:6px 6px 2px 2px;transition:height .4s}
+  .bar-day{font-size:11.5px;color:var(--ink-soft)}
+  .stats{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .stat{background:var(--teal-soft);border-radius:12px;padding:14px 12px;text-align:center}
+  .stat .v{font-family:'Frank Ruhl Libre',serif;font-weight:900;font-size:24px;color:var(--teal)}
+  .stat .l{font-size:11.5px;color:var(--ink-soft);margin-top:2px}
+  pre.report{white-space:pre-wrap;background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:14px;font-size:13.5px;font-family:'Heebo',sans-serif;line-height:1.8;margin:0}
+  .btn-copy{margin-top:12px;width:100%;padding:12px;border-radius:12px;border:none;background:var(--teal);color:#fff;font-weight:700;font-size:14px;cursor:pointer;font-family:'Heebo',sans-serif}
+  .disclaimer{font-size:11.5px;color:var(--ink-soft);line-height:1.7;padding:0 4px}
+  #toast{position:fixed;bottom:22px;right:50%;transform:translateX(50%);background:var(--ink);color:#fff;padding:10px 18px;border-radius:999px;font-size:13.5px;box-shadow:0 4px 14px rgba(20,49,58,.25);opacity:0;pointer-events:none;transition:opacity .25s}
+  #toast.show{opacity:1}
+  button:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
+  .hidden{display:none}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="header">
+    <div class="brand">2.5<span>ל׳</span></div>
+    <div class="date" id="dateLabel"></div>
+  </div>
+  <div class="subtitle">יומן הידרציה למניעת הישנות אבני כליות · אב־טיפוס</div>
+
+  <div class="tabs">
+    <button id="tab-today" class="active" onclick="setTab('today')">היום</button>
+    <button id="tab-trends" onclick="setTab('trends')">מגמות</button>
+    <button id="tab-report" onclick="setTab('report')">דוח לרופא</button>
+  </div>
+
+  <!-- TODAY -->
+  <div id="view-today">
+    <div class="card">
+      <h2>שתייה</h2>
+      <div class="sub">היעד היומי: 3.0 ליטר צריכה — כדי להגיע לכ־2.5 ל׳ תפוקת שתן, בהתאם להנחיה הרפואית שקיבלת</div>
+      <div class="today-grid">
+        <div class="ring-box">
+          <svg width="168" height="168" style="transform:rotate(-90deg)">
+            <circle cx="84" cy="84" r="77" fill="none" stroke="var(--teal-soft)" stroke-width="14"/>
+            <circle id="ringFill" cx="84" cy="84" r="77" fill="none" stroke="var(--water)" stroke-width="14" stroke-linecap="round" stroke-dasharray="0 484" style="transition:stroke-dasharray .5s ease"/>
+          </svg>
+          <div class="ring-center">
+            <div class="ring-val" id="ringVal">0.0</div>
+            <div class="ring-goal">מתוך 3.0 ליטר</div>
+            <div class="ring-done hidden" id="ringDone">היעד הושג ✓</div>
+          </div>
+        </div>
+        <div class="cups">
+          <button onclick="addDrink(200)"><div class="ml">200 מ״ל</div><div class="lbl">כוס</div></button>
+          <button onclick="addDrink(330)"><div class="ml">330 מ״ל</div><div class="lbl">פחית</div></button>
+          <button onclick="addDrink(500)"><div class="ml">500 מ״ל</div><div class="lbl">בקבוק</div></button>
+          <button onclick="addDrink(750)"><div class="ml">750 מ״ל</div><div class="lbl">בקבוק גדול</div></button>
+        </div>
+      </div>
+      <button class="undo hidden" id="undoBtn" onclick="undoDrink()"></button>
+    </div>
+
+    <div class="card">
+      <h2>צבע השתן</h2>
+      <div class="sub">סמן את הצבע הקרוב ביותר בביקור האחרון בשירותים — זה המדד האמין ביותר להידרציה שלך</div>
+      <div class="urine" id="urineRow"></div>
+      <div class="urine-scale"><span>תקין (1–3)</span><span>שתה עכשיו (6–8)</span></div>
+      <div class="urine-msg hidden" id="urineMsg"></div>
+    </div>
+
+    <div class="card">
+      <h2>אירוע כאב</h2>
+      <div class="sub">תיעוד התקפים עוזר לרופא לזהות דפוסים מול נתוני השתייה</div>
+      <button class="pain-open" id="painOpenBtn" onclick="togglePain(true)">+ תיעוד כאב</button>
+      <div class="pain-form hidden" id="painForm">
+        <div style="font-size:13px;margin-bottom:4px">עוצמה: <b id="painLevelLabel">5</b> / 10</div>
+        <input type="range" min="1" max="10" value="5" id="painRange" oninput="document.getElementById('painLevelLabel').textContent=this.value">
+        <input type="text" id="painNote" placeholder="הערה (מיקום, נסיבות…) — לא חובה">
+        <div class="pain-actions">
+          <button class="btn-amber" onclick="logPain()">שמירת האירוע</button>
+          <button class="btn-ghost" onclick="togglePain(false)">ביטול</button>
+        </div>
+      </div>
+      <div class="pain-note hidden" id="painSummary"></div>
+    </div>
+  </div>
+
+  <!-- TRENDS -->
+  <div id="view-trends" class="hidden">
+    <div class="card">
+      <h2>7 הימים האחרונים</h2>
+      <div class="sub">הקו המקווקו מסמן את היעד (3.0 ל׳)</div>
+      <div class="chart" id="weekChart"></div>
+    </div>
+    <div class="card">
+      <h2>סיכום 30 יום</h2>
+      <div style="height:10px"></div>
+      <div class="stats" id="monthStats"></div>
+    </div>
+  </div>
+
+  <!-- REPORT -->
+  <div id="view-report" class="hidden">
+    <div class="card">
+      <h2>דוח לרופא המטפל</h2>
+      <div class="sub">סיכום 30 הימים האחרונים — להצגה בביקורת או לשליחה מראש</div>
+      <pre class="report" id="reportText"></pre>
+      <button class="btn-copy" onclick="copyReport()">העתקת הדוח</button>
+    </div>
+    <div class="disclaimer">
+      היישום מיועד לתיעוד ומעקב בלבד ואינו מהווה ייעוץ רפואי, אבחון או טיפול. יעדי השתייה נקבעים על ידי הרופא המטפל בלבד. במקרה של כאב חריף — פנה לקבלת טיפול רפואי.
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+const GOAL = 3000;
+const URINE_COLORS = ["#F9F8EC","#F6F3C9","#F3EDA6","#EFE382","#EAD35B","#DDB63C","#C89226","#A96E1B"];
+const HE_DAYS = ["א׳","ב׳","ג׳","ד׳","ה׳","ו׳","ש׳"];
+const CIRC = 2*Math.PI*77;
+
+let days = {};
+try { days = JSON.parse(localStorage.getItem("litho-days") || "{}"); } catch(e){ days = {}; }
+
+const todayKey = () => new Date().toISOString().slice(0,10);
+const fmtL = ml => (ml/1000).toFixed(ml%1000===0?1:2);
+const getDay = k => Object.assign({intake:[],urine:[],pain:[]}, days[k]||{});
+function save(){ try{ localStorage.setItem("litho-days", JSON.stringify(days)); }catch(e){} }
+function mutate(fn){ const k=todayKey(); days[k]=fn(getDay(k)); save(); render(); }
+
+let toastTimer=null;
+function ping(msg){
+  const t=document.getElementById("toast");
+  t.textContent=msg; t.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>t.classList.remove("show"),1800);
+}
+
+function addDrink(ml){ mutate(d=>({...d,intake:[...d.intake,{ml,t:Date.now()}]})); ping(`נוספו ${ml} מ״ל`); }
+function undoDrink(){ mutate(d=>({...d,intake:d.intake.slice(0,-1)})); ping("הרישום האחרון בוטל"); }
+function logUrine(c){ mutate(d=>({...d,urine:[...d.urine,{color:c,t:Date.now()}]})); ping(c<=3?"צבע תקין — המשך כך":"צבע כהה — כדאי לשתות עכשיו"); }
+function togglePain(open){
+  document.getElementById("painForm").classList.toggle("hidden",!open);
+  document.getElementById("painOpenBtn").classList.toggle("hidden",open);
+}
+function logPain(){
+  const level=+document.getElementById("painRange").value;
+  const note=document.getElementById("painNote").value.trim();
+  mutate(d=>({...d,pain:[...d.pain,{level,note,t:Date.now()}]}));
+  document.getElementById("painNote").value="";
+  document.getElementById("painRange").value=5;
+  document.getElementById("painLevelLabel").textContent="5";
+  togglePain(false);
+  ping("אירוע הכאב תועד");
+}
+
+function setTab(id){
+  ["today","trends","report"].forEach(t=>{
+    document.getElementById("view-"+t).classList.toggle("hidden",t!==id);
+    document.getElementById("tab-"+t).classList.toggle("active",t===id);
+  });
+  render();
+}
+
+function lastNDays(n){
+  const out=[];
+  for(let i=n-1;i>=0;i--){
+    const dt=new Date(); dt.setDate(dt.getDate()-i);
+    const k=dt.toISOString().slice(0,10);
+    const d=getDay(k);
+    out.push({key:k,dow:HE_DAYS[dt.getDay()],
+      intake:d.intake.reduce((s,e)=>s+e.ml,0),urine:d.urine,pain:d.pain});
+  }
+  return out;
+}
+
+function render(){
+  document.getElementById("dateLabel").textContent =
+    new Date().toLocaleDateString("he-IL",{weekday:"long",day:"numeric",month:"long"});
+
+  const t=getDay(todayKey());
+  const intake=t.intake.reduce((s,e)=>s+e.ml,0);
+  const pct=Math.min(intake/GOAL,1);
+
+  // ring
+  const ring=document.getElementById("ringFill");
+  ring.setAttribute("stroke-dasharray",`${pct*CIRC} ${CIRC-pct*CIRC}`);
+  ring.setAttribute("stroke", pct>=1?"var(--good)":"var(--water)");
+  document.getElementById("ringVal").textContent=fmtL(intake);
+  document.getElementById("ringDone").classList.toggle("hidden",pct<1);
+
+  // undo
+  const undo=document.getElementById("undoBtn");
+  if(t.intake.length){
+    undo.classList.remove("hidden");
+    undo.textContent=`ביטול הרישום האחרון (${t.intake[t.intake.length-1].ml} מ״ל)`;
+  } else undo.classList.add("hidden");
+
+  // urine strip
+  const last=t.urine.length?t.urine[t.urine.length-1].color:null;
+  const row=document.getElementById("urineRow");
+  row.innerHTML="";
+  URINE_COLORS.forEach((col,i)=>{
+    const b=document.createElement("button");
+    b.style.background=col;
+    b.setAttribute("aria-label",`צבע ${i+1}`);
+    if(last===i+1)b.classList.add("sel");
+    b.onclick=()=>logUrine(i+1);
+    row.appendChild(b);
+  });
+  const msg=document.getElementById("urineMsg");
+  if(last){
+    msg.classList.remove("hidden");
+    msg.style.color=last<=3?"var(--good)":"var(--amber)";
+    msg.textContent=last<=3?"מצוין — רמת ההידרציה טובה":last<=5?"בינוני — הוסף כוס מים בשעה הקרובה":"כהה — שתה 500 מ״ל בהקדם";
+  } else msg.classList.add("hidden");
+
+  // pain summary
+  const ps=document.getElementById("painSummary");
+  if(t.pain.length){
+    ps.classList.remove("hidden");
+    ps.textContent=`תועדו היום ${t.pain.length} אירועים (עוצמה אחרונה: ${t.pain[t.pain.length-1].level})`;
+  } else ps.classList.add("hidden");
+
+  // week chart
+  const week=lastNDays(7);
+  const chart=document.getElementById("weekChart");
+  chart.innerHTML=`<div class="goal-line" style="bottom:${150*(GOAL/4000)}px"></div>`;
+  week.forEach(d=>{
+    const h=Math.max(Math.min(d.intake/4000,1)*150,3);
+    const color=d.intake===0?"var(--line)":d.intake>=GOAL?"var(--good)":"var(--water)";
+    const col=document.createElement("div");
+    col.className="bar-col";
+    col.innerHTML=`<div class="bar-val">${d.intake?fmtL(d.intake):""}</div>
+      <div class="bar" style="height:${h}px;background:${color}"></div>
+      <div class="bar-day">${d.dow}</div>`;
+    chart.appendChild(col);
+  });
+
+  // month stats + report
+  const month=lastNDays(30);
+  const active=month.filter(d=>d.intake>0);
+  const avg=active.length?Math.round(active.reduce((s,d)=>s+d.intake,0)/active.length):0;
+  const goalDays=month.filter(d=>d.intake>=GOAL).length;
+  const painEvents=month.reduce((s,d)=>s+d.pain.length,0);
+  const uAll=month.flatMap(d=>d.urine.map(u=>u.color));
+  const avgU=uAll.length?(uAll.reduce((s,c)=>s+c,0)/uAll.length).toFixed(1):null;
+
+  document.getElementById("monthStats").innerHTML=[
+    {v:active.length?fmtL(avg)+" ל׳":"—",l:"צריכה יומית ממוצעת"},
+    {v:goalDays+"/30",l:"ימים בהם הושג היעד"},
+    {v:avgU??"—",l:"צבע שתן ממוצע (1–8)"},
+    {v:painEvents,l:"אירועי כאב"},
+  ].map(s=>`<div class="stat"><div class="v">${s.v}</div><div class="l">${s.l}</div></div>`).join("");
+
+  window._report=
+`דוח הידרציה — 30 הימים האחרונים
+ימי תיעוד: ${active.length}
+צריכה יומית ממוצעת: ${fmtL(avg)} ליטר (יעד: ${fmtL(GOAL)} ל׳)
+ימים בהם הושג היעד: ${goalDays} מתוך 30
+צבע שתן ממוצע (סולם 1–8): ${avgU??"לא תועד"}
+אירועי כאב שתועדו: ${painEvents}`;
+  document.getElementById("reportText").textContent=window._report;
+}
+
+function copyReport(){
+  if(navigator.clipboard){
+    navigator.clipboard.writeText(window._report).then(()=>ping("הדוח הועתק"));
+  } else {
+    ping("ההעתקה אינה נתמכת בדפדפן זה — סמן והעתק ידנית");
+  }
+}
+
+render();
+</script>
+</body>
+</html>

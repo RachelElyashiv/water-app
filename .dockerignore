@@ -1,0 +1,11 @@
+node_modules
+data
+.env
+*.log
+.git
+scratch_secrets.txt
+cookies.txt
+c.txt
+c2.txt
+index.html
+הוראות.txt

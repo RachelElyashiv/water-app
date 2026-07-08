@@ -1,0 +1,8 @@
+node_modules/
+data/
+.env
+*.log
+scratch_secrets.txt
+cookies.txt
+c.txt
+c2.txt

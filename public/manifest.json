@@ -1,0 +1,14 @@
+{
+  "name": "יומן הידרציה 2.5ל׳",
+  "short_name": "2.5ל׳",
+  "description": "יומן הידרציה למניעת הישנות אבני כליות",
+  "lang": "he",
+  "dir": "rtl",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F5F9FA",
+  "theme_color": "#177687",
+  "icons": [
+    { "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}

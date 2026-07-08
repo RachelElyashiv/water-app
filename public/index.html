@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#177687">
+<title>2.5ל׳ — יומן הידרציה לאבני כליות</title>
+<link rel="manifest" href="/manifest.json">
+<link rel="apple-touch-icon" href="/icon.svg">
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700&family=Frank+Ruhl+Libre:wght@700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+
+<!-- ================= AUTH ================= -->
+<div id="auth-screen" class="auth-wrap hidden">
+  <div class="auth-brand">2.5<span>ל׳</span></div>
+  <div class="auth-tag">יומן הידרציה למניעת הישנות אבני כליות</div>
+  <div class="auth-card">
+    <div class="auth-switch">
+      <button id="sw-login" class="active" onclick="setAuthMode('login')">התחברות</button>
+      <button id="sw-register" onclick="setAuthMode('register')">הרשמה</button>
+    </div>
+    <form id="auth-form" onsubmit="return submitAuth(event)">
+      <div class="field" id="name-field">
+        <label for="au-name">שם</label>
+        <input type="text" id="au-name" autocomplete="name">
+      </div>
+      <div class="field">
+        <label for="au-email">אימייל</label>
+        <input type="email" id="au-email" autocomplete="email" required>
+      </div>
+      <div class="field">
+        <label for="au-password">סיסמה</label>
+        <input type="password" id="au-password" autocomplete="current-password" required>
+      </div>
+      <button type="submit" class="auth-submit" id="au-submit">התחברות</button>
+      <div class="auth-error" id="au-error"></div>
+    </form>
+  </div>
+</div>
+
+<!-- ================= APP ================= -->
+<div id="app-screen" class="wrap hidden">
+  <div class="header">
+    <div class="brand">2.5<span>ל׳</span></div>
+    <div class="date" id="dateLabel"></div>
+  </div>
+  <div class="subtitle">יומן הידרציה למניעת הישנות אבני כליות</div>
+
+  <div class="usered">
+    <div>שלום, <b id="userName"></b></div>
+    <button onclick="logout()">התנתקות</button>
+  </div>
+
+  <div class="tabs">
+    <button id="tab-today" class="active" onclick="setTab('today')">היום</button>
+    <button id="tab-trends" onclick="setTab('trends')">מגמות</button>
+    <button id="tab-report" onclick="setTab('report')">דוח</button>
+    <button id="tab-settings" onclick="setTab('settings')">הגדרות</button>
+  </div>
+
+  <!-- TODAY -->
+  <div id="view-today">
+    <div class="card">
+      <h2>שתייה</h2>
+      <div class="sub" id="goalSub"></div>
+      <div class="today-grid">
+        <div class="ring-box">
+          <svg width="168" height="168" style="transform:rotate(-90deg)">
+            <circle cx="84" cy="84" r="77" fill="none" stroke="var(--teal-soft)" stroke-width="14"/>
+            <circle id="ringFill" cx="84" cy="84" r="77" fill="none" stroke="var(--water)" stroke-width="14" stroke-linecap="round" stroke-dasharray="0 484" style="transition:stroke-dasharray .5s ease"/>
+          </svg>
+          <div class="ring-center">
+            <div class="ring-val" id="ringVal">0.0</div>
+            <div class="ring-goal" id="ringGoal">מתוך 3.0 ליטר</div>
+            <div class="ring-done hidden" id="ringDone">היעד הושג ✓</div>
+          </div>
+        </div>
+        <div class="cups" id="cupsRow"></div>
+      </div>
+      <button class="undo hidden" id="undoBtn" onclick="undoDrink()"></button>
+    </div>
+
+    <div class="card">
+      <h2>יומן היום</h2>
+      <div class="sub">כל הרישומים של היום — אפשר למחוק כל אחד</div>
+      <div id="timeline" class="timeline"></div>
+    </div>
+
+    <div class="card">
+      <h2>צבע השתן</h2>
+      <div class="sub">סמן את הצבע הקרוב ביותר בביקור האחרון בשירותים — זה המדד האמין ביותר להידרציה שלך</div>
+      <div class="urine" id="urineRow"></div>
+      <div class="urine-scale"><span>תקין (1–3)</span><span>שתה עכשיו (6–8)</span></div>
+      <div class="urine-msg hidden" id="urineMsg"></div>
+    </div>
+
+    <div class="card">
+      <h2>אירוע כאב</h2>
+      <div class="sub">תיעוד התקפים עוזר לרופא לזהות דפוסים מול נתוני השתייה</div>
+      <button class="pain-open" id="painOpenBtn" onclick="togglePain(true)">+ תיעוד כאב</button>
+      <div class="pain-form hidden" id="painForm">
+        <div style="font-size:13px;margin-bottom:4px">עוצמה: <b id="painLevelLabel">5</b> / 10</div>
+        <input type="range" min="1" max="10" value="5" id="painRange" oninput="document.getElementById('painLevelLabel').textContent=this.value">
+        <input type="text" id="painNote" placeholder="הערה (מיקום, נסיבות…) — לא חובה">
+        <div class="pain-actions">
+          <button class="btn-amber" onclick="logPain()">שמירת האירוע</button>
+          <button class="btn-ghost" onclick="togglePain(false)">ביטול</button>
+        </div>
+      </div>
+      <div class="pain-note hidden" id="painSummary"></div>
+    </div>
+  </div>
+
+  <!-- TRENDS -->
+  <div id="view-trends" class="hidden">
+    <div class="card">
+      <h2>7 הימים האחרונים</h2>
+      <div class="sub">הקו המקווקו מסמן את היעד</div>
+      <div class="chart" id="weekChart"></div>
+    </div>
+    <div class="card">
+      <h2>סיכום 30 יום</h2>
+      <div style="height:10px"></div>
+      <div class="stats" id="monthStats"></div>
+    </div>
+  </div>
+
+  <!-- REPORT -->
+  <div id="view-report" class="hidden">
+    <div class="card" id="reportCard">
+      <h2>דוח לרופא המטפל</h2>
+      <div class="sub">סיכום 30 הימים האחרונים — להצגה בביקורת או לשליחה מראש</div>
+      <pre class="report" id="reportText"></pre>
+      <div class="report-actions">
+        <button class="btn-copy" onclick="copyReport()">העתקת הדוח</button>
+        <button class="btn-copy alt" onclick="window.print()">שמירה כ־PDF / הדפסה</button>
+      </div>
+    </div>
+    <div class="disclaimer">
+      היישום מיועד לתיעוד ומעקב בלבד ואינו מהווה ייעוץ רפואי, אבחון או טיפול. יעדי השתייה נקבעים על ידי הרופא המטפל בלבד. במקרה של כאב חריף — פנה לקבלת טיפול רפואי.
+    </div>
+  </div>
+
+  <!-- SETTINGS -->
+  <div id="view-settings" class="hidden">
+    <div class="card">
+      <h2>יעד יומי</h2>
+      <div class="sub">כמות השתייה היומית שנקבעה על ידי הרופא</div>
+      <div class="goal-edit">
+        <input type="number" id="goalInput" min="500" max="6000" step="100">
+        <span>מ״ל</span>
+        <button class="btn-ghost" onclick="saveGoal()">שמור</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>גדלי כוסות</h2>
+      <div class="sub">התאם את כפתורי השתייה המהירה (עד 8 גדלים, במ״ל)</div>
+      <div id="cupsEditor" class="cups-editor"></div>
+      <div class="cups-add">
+        <input type="number" id="newCup" min="10" max="3000" step="10" placeholder="למשל 250">
+        <button class="btn-ghost" onclick="addCup()">הוסף גודל</button>
+      </div>
+      <button class="btn-copy" onclick="saveCups()">שמירת הגדלים</button>
+    </div>
+
+    <div class="card">
+      <h2>תזכורות שתייה</h2>
+      <div class="sub">קבל התראה לטלפון/מחשב כשלא שתית מספיק — גם כשהאפליקציה סגורה</div>
+      <label class="toggle-row">
+        <span>הפעל תזכורות</span>
+        <input type="checkbox" id="remEnabled">
+      </label>
+      <div class="rem-fields">
+        <div class="rem-field"><span>כל</span><input type="number" id="remInterval" min="30" max="360" step="15"><span>דקות</span></div>
+        <div class="rem-field"><span>משעה</span><input type="number" id="remStart" min="0" max="23"><span>עד שעה</span><input type="number" id="remEnd" min="1" max="24"></div>
+      </div>
+      <button class="btn-copy" onclick="saveReminders()">שמירת התזכורות</button>
+      <div class="rem-note" id="remNote"></div>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+<script src="/app.js"></script>
+</body>
+</html>

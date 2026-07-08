@@ -336,6 +336,35 @@ function copyReport() {
   else ping("ההעתקה אינה נתמכת בדפדפן זה — סמן והעתק ידנית");
 }
 
+// ---------- install (PWA) ----------
+let deferredInstall = null;
+const isStandalone = () =>
+  window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
+
+window.addEventListener("beforeinstallprompt", (e) => {
+  e.preventDefault();
+  deferredInstall = e;
+  if (!isStandalone()) $("installBtn").classList.remove("hidden");
+});
+window.addEventListener("appinstalled", () => {
+  deferredInstall = null;
+  $("installBtn").classList.add("hidden");
+});
+async function promptInstall() {
+  if (!deferredInstall) return;
+  deferredInstall.prompt();
+  await deferredInstall.userChoice;
+  deferredInstall = null;
+  $("installBtn").classList.add("hidden");
+}
+// iOS Safari has no beforeinstallprompt — show manual hint instead
+(function iosInstallHint() {
+  const ua = navigator.userAgent || "";
+  const isIOS = /iphone|ipad|ipod/i.test(ua);
+  const isSafari = /safari/i.test(ua) && !/crios|fxios|edgios/i.test(ua);
+  if (isIOS && isSafari && !isStandalone()) $("iosHint").classList.remove("hidden");
+})();
+
 // ---------- boot ----------
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("/sw.js").catch(() => {});
 

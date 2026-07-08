@@ -6,7 +6,12 @@
 <meta name="theme-color" content="#177687">
 <title>2.5ל׳ — יומן הידרציה לאבני כליות</title>
 <link rel="manifest" href="/manifest.json">
-<link rel="apple-touch-icon" href="/icon.svg">
+<link rel="icon" href="/icon-192.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="2.5ל׳">
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700&family=Frank+Ruhl+Libre:wght@700;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/styles.css">
 </head>
@@ -37,6 +42,10 @@
       <button type="submit" class="auth-submit" id="au-submit">התחברות</button>
       <div class="auth-error" id="au-error"></div>
     </form>
+  </div>
+  <button id="installBtn" class="install-btn hidden" onclick="promptInstall()">📲 התקן כאפליקציה</button>
+  <div id="iosHint" class="ios-hint hidden">
+    להתקנה ב־iPhone: לחצו על כפתור השיתוף <b>􀈂</b> בתחתית הדפדפן, ואז «<b>הוסף למסך הבית</b>».
   </div>
 </div>
 

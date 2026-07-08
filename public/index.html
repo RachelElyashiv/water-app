@@ -183,6 +183,36 @@
     </div>
 
     <div class="card">
+      <h2 data-i18n="calc_title">מחשבון כמות מים</h2>
+      <div class="sub" data-i18n="calc_sub">הערכה כללית לפי גוף ואורח חיים — אינה ייעוץ רפואי; יעד הרופא גובר</div>
+      <div class="calc-field">
+        <label for="calcWeight" data-i18n="calc_weight">משקל (ק״ג)</label>
+        <input type="number" id="calcWeight" min="20" max="250" step="1" placeholder="70">
+      </div>
+      <div class="calc-field">
+        <label for="calcActivity" data-i18n="calc_activity">רמת פעילות</label>
+        <select id="calcActivity">
+          <option value="low" data-i18n="calc_act_low"></option>
+          <option value="mid" data-i18n="calc_act_mid"></option>
+          <option value="high" data-i18n="calc_act_high"></option>
+        </select>
+      </div>
+      <div class="calc-field">
+        <label for="calcClimate" data-i18n="calc_climate">אקלים</label>
+        <select id="calcClimate">
+          <option value="temperate" data-i18n="calc_clim_temp"></option>
+          <option value="hot" data-i18n="calc_clim_hot"></option>
+        </select>
+      </div>
+      <button class="btn-copy" onclick="calcIntake()" data-i18n="calc_calc">חשב</button>
+      <div class="calc-result hidden" id="calcResult">
+        <div class="calc-range" id="calcRange"></div>
+        <button class="btn-copy" onclick="applyCalcToGoal()" data-i18n="calc_use">השתמש כיעד שלי</button>
+        <div class="calc-note" data-i18n="calc_note_stone"></div>
+      </div>
+    </div>
+
+    <div class="card">
       <h2 data-i18n="cups_title">גדלי כוסות</h2>
       <div class="sub" data-i18n="cups_sub">התאם את כפתורי השתייה המהירה (עד 8 גדלים, במ״ל)</div>
       <div id="cupsEditor" class="cups-editor"></div>

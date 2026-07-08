@@ -137,6 +137,33 @@ async function saveCups() {
   applyUser(user); ping(t("toast_cups")); render();
 }
 
+// ---------- settings: water intake calculator ----------
+let calcData = null; // { low, high, suggested } in ml
+function renderCalcResult() {
+  if (!calcData) return;
+  $("calcRange").textContent = t("calc_result", {
+    low: (calcData.low / 1000).toFixed(1),
+    high: (calcData.high / 1000).toFixed(1),
+  });
+}
+function calcIntake() {
+  const w = parseInt($("calcWeight").value, 10);
+  if (!w || w < 20 || w > 250) { ping(t("calc_need_weight")); return; }
+  const actAdd = { low: 0, mid: 350, high: 700 }[$("calcActivity").value] || 0;
+  const climAdd = { temperate: 0, hot: 500 }[$("calcClimate").value] || 0;
+  const low = w * 30 + actAdd + climAdd;
+  const high = w * 35 + actAdd + climAdd;
+  const suggested = Math.min(6000, Math.max(500, Math.round((low + high) / 2 / 100) * 100));
+  calcData = { low, high, suggested };
+  renderCalcResult();
+  $("calcResult").classList.remove("hidden");
+}
+async function applyCalcToGoal() {
+  if (!calcData) return;
+  $("goalInput").value = calcData.suggested;
+  await saveGoal();
+}
+
 // ---------- settings: reminders ----------
 function reminderPayload() {
   return {
@@ -348,6 +375,7 @@ function onLangChanged() {
   $("langSelectApp").value = currentLang;
   if (!$("app-screen").classList.contains("hidden")) {
     renderSettings();
+    renderCalcResult();
     render();
   } else {
     setAuthMode(authMode);

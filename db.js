@@ -76,5 +76,6 @@ addColumn("reminder_interval_min", "reminder_interval_min INTEGER NOT NULL DEFAU
 addColumn("reminder_start", "reminder_start INTEGER NOT NULL DEFAULT 8");
 addColumn("reminder_end", "reminder_end INTEGER NOT NULL DEFAULT 22");
 addColumn("last_reminder_ts", "last_reminder_ts INTEGER NOT NULL DEFAULT 0");
+addColumn("lang", "lang TEXT NOT NULL DEFAULT 'he'");
 
 export default db;

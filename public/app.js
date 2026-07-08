@@ -1,6 +1,6 @@
 const URINE_COLORS = ["#F9F8EC","#F6F3C9","#F3EDA6","#EFE382","#EAD35B","#DDB63C","#C89226","#A96E1B"];
-const HE_DAYS = ["א׳","ב׳","ג׳","ד׳","ה׳","ו׳","ש׳"];
 const CIRC = 2 * Math.PI * 77;
+const weekdayShort = (date) => new Intl.DateTimeFormat(currentLocale(), { weekday: "narrow" }).format(date);
 
 let state = { goal_ml: 3000, days: {}, name: "", cups: [200,330,500,750],
   reminder_enabled: false, reminder_interval_min: 120, reminder_start: 8, reminder_end: 22 };
@@ -12,7 +12,7 @@ const $ = (id) => document.getElementById(id);
 const todayKey = () => new Date().toISOString().slice(0, 10);
 const fmtL = (ml) => (ml / 1000).toFixed(ml % 1000 === 0 ? 1 : 2);
 const getDay = (k) => Object.assign({ intake: 0, urine: [], pain: [] }, state.days[k] || {});
-const fmtTime = (ts) => new Date(ts).toLocaleTimeString("he-IL", { hour: "2-digit", minute: "2-digit" });
+const fmtTime = (ts) => new Date(ts).toLocaleTimeString(currentLocale(), { hour: "2-digit", minute: "2-digit" });
 
 // ---------- api ----------
 async function api(path, method = "GET", body) {
@@ -21,7 +21,12 @@ async function api(path, method = "GET", body) {
   const res = await fetch("/api" + path, opts);
   let data = {};
   try { data = await res.json(); } catch {}
-  if (!res.ok) throw new Error(data.error || "שגיאה בשרת");
+  if (!res.ok) {
+    const msg = data.code && TR["err_" + data.code] ? t("err_" + data.code) : data.error || t("err_generic");
+    const err = new Error(msg);
+    err.code = data.code;
+    throw err;
+  }
   return data;
 }
 
@@ -40,7 +45,7 @@ function setAuthMode(mode) {
   $("sw-login").classList.toggle("active", mode === "login");
   $("sw-register").classList.toggle("active", mode === "register");
   $("name-field").classList.toggle("hidden", mode === "login");
-  $("au-submit").textContent = mode === "login" ? "התחברות" : "הרשמה";
+  $("au-submit").textContent = mode === "login" ? t("login") : t("register");
   $("au-name").required = mode === "register";
   $("au-error").textContent = "";
   $("au-password").setAttribute("autocomplete", mode === "login" ? "current-password" : "new-password");
@@ -79,12 +84,12 @@ async function loadData() {
   render();
 }
 
-async function addDrink(ml) { await api("/drinks", "POST", { ml }); ping(`נוספו ${ml} מ״ל`); await loadData(); }
-async function undoDrink() { await api("/drinks/last", "DELETE"); ping("הרישום האחרון בוטל"); await loadData(); }
-async function delEntry(table, id) { await api(`/${table}/${id}`, "DELETE"); ping("הרישום נמחק"); await loadData(); }
+async function addDrink(ml) { await api("/drinks", "POST", { ml }); ping(t("toast_added", { ml })); await loadData(); }
+async function undoDrink() { await api("/drinks/last", "DELETE"); ping(t("toast_undo")); await loadData(); }
+async function delEntry(table, id) { await api(`/${table}/${id}`, "DELETE"); ping(t("toast_deleted")); await loadData(); }
 async function logUrine(color) {
   await api("/urine", "POST", { color });
-  ping(color <= 3 ? "צבע תקין — המשך כך" : "צבע כהה — כדאי לשתות עכשיו");
+  ping(color <= 3 ? t("toast_urine_ok") : t("toast_urine_drk"));
   await loadData();
 }
 function togglePain(open) {
@@ -96,12 +101,12 @@ async function logPain() {
   const note = $("painNote").value.trim();
   await api("/pain", "POST", { level, note });
   $("painNote").value = ""; $("painRange").value = 5; $("painLevelLabel").textContent = "5";
-  togglePain(false); ping("אירוע הכאב תועד"); await loadData();
+  togglePain(false); ping(t("toast_pain")); await loadData();
 }
 async function saveGoal() {
   const goal = parseInt($("goalInput").value, 10);
   const data = await api("/goal", "PUT", { goal_ml: goal });
-  state.goal_ml = data.goal_ml; ping("היעד עודכן"); render();
+  state.goal_ml = data.goal_ml; ping(t("toast_goal")); render();
 }
 
 // ---------- settings: cups ----------
@@ -121,15 +126,15 @@ function renderCupsEditor() {
 }
 function addCup() {
   const v = parseInt($("newCup").value, 10);
-  if (!v || v <= 0 || v > 3000) { ping("הכנס גודל תקין (עד 3000 מ״ל)"); return; }
-  if (editCups.length >= 8) { ping("עד 8 גדלים"); return; }
+  if (!v || v <= 0 || v > 3000) { ping(t("cup_invalid")); return; }
+  if (editCups.length >= 8) { ping(t("cup_max8")); return; }
   editCups.push(v); editCups = [...new Set(editCups)].sort((a, b) => a - b);
   $("newCup").value = ""; renderCupsEditor();
 }
 async function saveCups() {
-  if (!editCups.length) { ping("צריך לפחות גודל אחד"); return; }
-  const { user } = await api("/settings", "PUT", { cups: editCups, ...reminderPayload() });
-  applyUser(user); ping("גדלי הכוסות נשמרו"); render();
+  if (!editCups.length) { ping(t("cup_need_one")); return; }
+  const { user } = await api("/settings", "PUT", { cups: editCups, lang: currentLang, ...reminderPayload() });
+  applyUser(user); ping(t("toast_cups")); render();
 }
 
 // ---------- settings: reminders ----------
@@ -147,9 +152,9 @@ async function saveReminders() {
     const ok = await enablePush();
     if (!ok) { $("remEnabled").checked = false; return; }
   }
-  const { user } = await api("/settings", "PUT", { cups: editCups, ...payload });
+  const { user } = await api("/settings", "PUT", { cups: editCups, lang: currentLang, ...payload });
   applyUser(user);
-  ping("התזכורות נשמרו");
+  ping(t("toast_rem"));
   render();
 }
 
@@ -161,16 +166,16 @@ function urlBase64ToUint8Array(base64) {
 }
 async function enablePush() {
   if (!("serviceWorker" in navigator) || !("PushManager" in window)) {
-    $("remNote").textContent = "הדפדפן הזה אינו תומך בתזכורות דחיפה."; return false;
+    $("remNote").textContent = t("rem_note_nosup"); return false;
   }
   const perm = await Notification.requestPermission();
-  if (perm !== "granted") { $("remNote").textContent = "כדי לקבל תזכורות יש לאשר התראות בדפדפן."; return false; }
+  if (perm !== "granted") { $("remNote").textContent = t("rem_note_noperm"); return false; }
   const reg = await navigator.serviceWorker.ready;
   const { key } = await api("/vapidPublicKey");
   let sub = await reg.pushManager.getSubscription();
   if (!sub) sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: urlBase64ToUint8Array(key) });
   await api("/push/subscribe", "POST", sub.toJSON());
-  $("remNote").textContent = "התזכורות פעילות ✓";
+  $("remNote").textContent = t("rem_note_active");
   return true;
 }
 
@@ -200,7 +205,7 @@ function lastNDays(n) {
     const dt = new Date(); dt.setDate(dt.getDate() - i);
     const k = dt.toISOString().slice(0, 10);
     const d = getDay(k);
-    out.push({ key: k, dow: HE_DAYS[dt.getDay()], intake: d.intake, urine: d.urine, pain: d.pain });
+    out.push({ key: k, dow: weekdayShort(dt), intake: d.intake, urine: d.urine, pain: d.pain });
   }
   return out;
 }
@@ -208,23 +213,23 @@ function lastNDays(n) {
 // ---------- render ----------
 function render() {
   const GOAL = state.goal_ml;
-  $("dateLabel").textContent = new Date().toLocaleDateString("he-IL", { weekday: "long", day: "numeric", month: "long" });
-  $("goalSub").textContent = `היעד היומי: ${fmtL(GOAL)} ליטר צריכה — בהתאם להנחיה הרפואית שקיבלת`;
-  $("ringGoal").textContent = `מתוך ${fmtL(GOAL)} ליטר`;
+  $("dateLabel").textContent = new Date().toLocaleDateString(currentLocale(), { weekday: "long", day: "numeric", month: "long" });
+  $("goalSub").textContent = t("goal_sub", { goal: fmtL(GOAL) });
+  $("ringGoal").textContent = t("ring_of", { goal: fmtL(GOAL) });
 
   // cups (dynamic)
   const cupsRow = $("cupsRow");
   cupsRow.innerHTML = "";
-  const cupLabel = (ml) => (ml <= 250 ? "כוס" : ml <= 400 ? "פחית" : ml <= 600 ? "בקבוק" : "בקבוק גדול");
+  const cupLabel = (ml) => (ml <= 250 ? t("cup_glass") : ml <= 400 ? t("cup_can") : ml <= 600 ? t("cup_bottle") : t("cup_bottle_lg"));
   state.cups.forEach((ml) => {
     const b = document.createElement("button");
-    b.innerHTML = `<div class="ml">${ml} מ״ל</div><div class="lbl">${cupLabel(ml)}</div>`;
+    b.innerHTML = `<div class="ml">${ml} ${t("ml")}</div><div class="lbl">${cupLabel(ml)}</div>`;
     b.onclick = () => addDrink(ml);
     cupsRow.appendChild(b);
   });
 
-  const t = getDay(todayKey());
-  const intake = t.intake;
+  const day = getDay(todayKey());
+  const intake = day.intake;
   const pct = Math.min(intake / GOAL, 1);
 
   const ring = $("ringFill");
@@ -234,18 +239,18 @@ function render() {
   $("ringDone").classList.toggle("hidden", pct < 1);
 
   const undo = $("undoBtn");
-  if (intake > 0) { undo.classList.remove("hidden"); undo.textContent = "ביטול הרישום האחרון"; }
+  if (intake > 0) { undo.classList.remove("hidden"); undo.textContent = t("undo_last"); }
   else undo.classList.add("hidden");
 
   renderTimeline();
 
-  const last = t.urine.length ? t.urine[t.urine.length - 1].color : null;
+  const last = day.urine.length ? day.urine[day.urine.length - 1].color : null;
   const row = $("urineRow");
   row.innerHTML = "";
   URINE_COLORS.forEach((col, i) => {
     const b = document.createElement("button");
     b.style.background = col;
-    b.setAttribute("aria-label", `צבע ${i + 1}`);
+    b.setAttribute("aria-label", `${t("urine_title")} ${i + 1}`);
     if (last === i + 1) b.classList.add("sel");
     b.onclick = () => logUrine(i + 1);
     row.appendChild(b);
@@ -254,13 +259,13 @@ function render() {
   if (last) {
     msg.classList.remove("hidden");
     msg.style.color = last <= 3 ? "var(--good)" : "var(--amber)";
-    msg.textContent = last <= 3 ? "מצוין — רמת ההידרציה טובה" : last <= 5 ? "בינוני — הוסף כוס מים בשעה הקרובה" : "כהה — שתה 500 מ״ל בהקדם";
+    msg.textContent = last <= 3 ? t("urine_good") : last <= 5 ? t("urine_mid") : t("urine_dark");
   } else msg.classList.add("hidden");
 
   const ps = $("painSummary");
-  if (t.pain.length) {
+  if (day.pain.length) {
     ps.classList.remove("hidden");
-    ps.textContent = `תועדו היום ${t.pain.length} אירועים (עוצמה אחרונה: ${t.pain[t.pain.length - 1].level})`;
+    ps.textContent = t("pain_summary", { count: day.pain.length, level: day.pain[day.pain.length - 1].level });
   } else ps.classList.add("hidden");
 
   // week chart
@@ -288,34 +293,35 @@ function render() {
   const uAll = month.flatMap((d) => d.urine.map((u) => u.color));
   const avgU = uAll.length ? (uAll.reduce((s, c) => s + c, 0) / uAll.length).toFixed(1) : null;
 
+  const L = t("brand_unit");
   $("monthStats").innerHTML = [
-    { v: active.length ? fmtL(avg) + " ל׳" : "—", l: "צריכה יומית ממוצעת" },
-    { v: goalDays + "/30", l: "ימים בהם הושג היעד" },
-    { v: avgU ?? "—", l: "צבע שתן ממוצע (1–8)" },
-    { v: painEvents, l: "אירועי כאב" },
+    { v: active.length ? fmtL(avg) + " " + L : "—", l: t("stat_avg") },
+    { v: goalDays + "/30", l: t("stat_goal_days") },
+    { v: avgU ?? "—", l: t("stat_urine_avg") },
+    { v: painEvents, l: t("stat_pain") },
   ].map((s) => `<div class="stat"><div class="v">${s.v}</div><div class="l">${s.l}</div></div>`).join("");
 
   window._report =
-`דוח הידרציה — 30 הימים האחרונים
-שם: ${state.name}
-תאריך הפקה: ${new Date().toLocaleDateString("he-IL")}
-ימי תיעוד: ${active.length}
-צריכה יומית ממוצעת: ${fmtL(avg)} ליטר (יעד: ${fmtL(GOAL)} ל׳)
-ימים בהם הושג היעד: ${goalDays} מתוך 30
-צבע שתן ממוצע (סולם 1–8): ${avgU ?? "לא תועד"}
-אירועי כאב שתועדו: ${painEvents}`;
+`${t("report_title")} — ${t("month_title")}
+${t("name")}: ${state.name}
+${new Date().toLocaleDateString(currentLocale())}
+${t("tab_today")}: ${active.length}
+${t("stat_avg")}: ${fmtL(avg)} ${L} (${t("goal_title")}: ${fmtL(GOAL)} ${L})
+${t("stat_goal_days")}: ${goalDays}/30
+${t("stat_urine_avg")}: ${avgU ?? "—"}
+${t("stat_pain")}: ${painEvents}`;
   $("reportText").textContent = window._report;
 }
 
 function renderTimeline() {
   const box = $("timeline");
   const items = [
-    ...today.drinks.map((d) => ({ ts: d.ts, table: "drinks", id: d.id, icon: "💧", text: `${d.ml} מ״ל` })),
-    ...today.urine.map((u) => ({ ts: u.ts, table: "urine", id: u.id, icon: "🎨", text: `צבע שתן ${u.color}` })),
-    ...today.pain.map((p) => ({ ts: p.ts, table: "pain", id: p.id, icon: "⚠️", text: `כאב ${p.level}/10${p.note ? " · " + p.note : ""}` })),
+    ...today.drinks.map((d) => ({ ts: d.ts, table: "drinks", id: d.id, icon: "💧", text: `${d.ml} ${t("ml")}` })),
+    ...today.urine.map((u) => ({ ts: u.ts, table: "urine", id: u.id, icon: "🎨", text: `${t("urine_title")} ${u.color}` })),
+    ...today.pain.map((p) => ({ ts: p.ts, table: "pain", id: p.id, icon: "⚠️", text: `${t("pain_title")} ${p.level}/10${p.note ? " · " + p.note : ""}` })),
   ].sort((a, b) => b.ts - a.ts);
 
-  if (!items.length) { box.innerHTML = `<div class="tl-empty">עדיין אין רישומים היום</div>`; return; }
+  if (!items.length) { box.innerHTML = `<div class="tl-empty">${t("no_entries_today")}</div>`; return; }
   box.innerHTML = "";
   items.forEach((it) => {
     const r = document.createElement("div");
@@ -324,7 +330,7 @@ function renderTimeline() {
       <span class="tl-text">${it.text}</span>
       <span class="tl-time">${fmtTime(it.ts)}</span>`;
     const del = document.createElement("button");
-    del.className = "tl-del"; del.textContent = "מחק"; del.title = "מחיקה";
+    del.className = "tl-del"; del.textContent = t("delete"); del.title = t("delete");
     del.onclick = () => delEntry(it.table, it.id);
     r.appendChild(del);
     box.appendChild(r);
@@ -332,8 +338,20 @@ function renderTimeline() {
 }
 
 function copyReport() {
-  if (navigator.clipboard) navigator.clipboard.writeText(window._report).then(() => ping("הדוח הועתק"));
-  else ping("ההעתקה אינה נתמכת בדפדפן זה — סמן והעתק ידנית");
+  if (navigator.clipboard) navigator.clipboard.writeText(window._report).then(() => ping(t("toast_copied")));
+  else ping(t("toast_copy_no"));
+}
+
+// called by i18n.setLang when the language changes
+function onLangChanged() {
+  $("langSelectAuth").value = currentLang;
+  $("langSelectApp").value = currentLang;
+  if (!$("app-screen").classList.contains("hidden")) {
+    renderSettings();
+    render();
+  } else {
+    setAuthMode(authMode);
+  }
 }
 
 // ---------- install (PWA) ----------
@@ -367,6 +385,10 @@ async function promptInstall() {
 
 // ---------- boot ----------
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("/sw.js").catch(() => {});
+
+initLangSelector($("langSelectAuth"));
+initLangSelector($("langSelectApp"));
+applyStaticTranslations();
 
 (async function init() {
   try { const { user } = await api("/me"); onLoggedIn(user); }

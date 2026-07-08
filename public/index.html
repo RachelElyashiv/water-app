@@ -19,60 +19,62 @@
 
 <!-- ================= AUTH ================= -->
 <div id="auth-screen" class="auth-wrap hidden">
-  <div class="auth-brand">2.5<span>ל׳</span></div>
-  <div class="auth-tag">יומן הידרציה למניעת הישנות אבני כליות</div>
+  <div class="lang-bar"><select id="langSelectAuth" class="lang-select" aria-label="Language"></select></div>
+  <div class="auth-brand">2.5<span data-i18n-brand>ל׳</span></div>
+  <div class="auth-tag" data-i18n="app_subtitle">יומן הידרציה למניעת הישנות אבני כליות</div>
   <div class="auth-card">
     <div class="auth-switch">
-      <button id="sw-login" class="active" onclick="setAuthMode('login')">התחברות</button>
-      <button id="sw-register" onclick="setAuthMode('register')">הרשמה</button>
+      <button id="sw-login" class="active" onclick="setAuthMode('login')" data-i18n="login">התחברות</button>
+      <button id="sw-register" onclick="setAuthMode('register')" data-i18n="register">הרשמה</button>
     </div>
     <form id="auth-form" onsubmit="return submitAuth(event)">
       <div class="field" id="name-field">
-        <label for="au-name">שם</label>
+        <label for="au-name" data-i18n="name">שם</label>
         <input type="text" id="au-name" autocomplete="name">
       </div>
       <div class="field">
-        <label for="au-email">אימייל</label>
+        <label for="au-email" data-i18n="email">אימייל</label>
         <input type="email" id="au-email" autocomplete="email" required>
       </div>
       <div class="field">
-        <label for="au-password">סיסמה</label>
+        <label for="au-password" data-i18n="password">סיסמה</label>
         <input type="password" id="au-password" autocomplete="current-password" required>
       </div>
-      <button type="submit" class="auth-submit" id="au-submit">התחברות</button>
+      <button type="submit" class="auth-submit" id="au-submit" data-i18n="login">התחברות</button>
       <div class="auth-error" id="au-error"></div>
     </form>
   </div>
-  <button id="installBtn" class="install-btn hidden" onclick="promptInstall()">📲 התקן כאפליקציה</button>
-  <div id="iosHint" class="ios-hint hidden">
-    להתקנה ב־iPhone: לחצו על כפתור השיתוף <b>􀈂</b> בתחתית הדפדפן, ואז «<b>הוסף למסך הבית</b>».
-  </div>
+  <button id="installBtn" class="install-btn hidden" onclick="promptInstall()" data-i18n="install_app">📲 התקן כאפליקציה</button>
+  <div id="iosHint" class="ios-hint hidden" data-i18n="ios_hint"></div>
 </div>
 
 <!-- ================= APP ================= -->
 <div id="app-screen" class="wrap hidden">
   <div class="header">
-    <div class="brand">2.5<span>ל׳</span></div>
+    <div class="brand">2.5<span data-i18n-brand>ל׳</span></div>
     <div class="date" id="dateLabel"></div>
   </div>
-  <div class="subtitle">יומן הידרציה למניעת הישנות אבני כליות</div>
+  <div class="subtitle" data-i18n="app_subtitle">יומן הידרציה למניעת הישנות אבני כליות</div>
 
   <div class="usered">
-    <div>שלום, <b id="userName"></b></div>
-    <button onclick="logout()">התנתקות</button>
+    <div><span data-i18n="hello">שלום,</span> <b id="userName"></b></div>
+    <div class="usered-right">
+      <select id="langSelectApp" class="lang-select" aria-label="Language"></select>
+      <button onclick="logout()" data-i18n="logout">התנתקות</button>
+    </div>
   </div>
 
   <div class="tabs">
-    <button id="tab-today" class="active" onclick="setTab('today')">היום</button>
-    <button id="tab-trends" onclick="setTab('trends')">מגמות</button>
-    <button id="tab-report" onclick="setTab('report')">דוח</button>
-    <button id="tab-settings" onclick="setTab('settings')">הגדרות</button>
+    <button id="tab-today" class="active" onclick="setTab('today')" data-i18n="tab_today">היום</button>
+    <button id="tab-trends" onclick="setTab('trends')" data-i18n="tab_trends">מגמות</button>
+    <button id="tab-report" onclick="setTab('report')" data-i18n="tab_report">דוח</button>
+    <button id="tab-settings" onclick="setTab('settings')" data-i18n="tab_settings">הגדרות</button>
   </div>
 
   <!-- TODAY -->
   <div id="view-today">
     <div class="card">
-      <h2>שתייה</h2>
+      <h2 data-i18n="drink_title">שתייה</h2>
       <div class="sub" id="goalSub"></div>
       <div class="today-grid">
         <div class="ring-box">
@@ -82,8 +84,8 @@
           </svg>
           <div class="ring-center">
             <div class="ring-val" id="ringVal">0.0</div>
-            <div class="ring-goal" id="ringGoal">מתוך 3.0 ליטר</div>
-            <div class="ring-done hidden" id="ringDone">היעד הושג ✓</div>
+            <div class="ring-goal" id="ringGoal"></div>
+            <div class="ring-done hidden" id="ringDone" data-i18n="goal_reached">היעד הושג ✓</div>
           </div>
         </div>
         <div class="cups" id="cupsRow"></div>
@@ -92,30 +94,48 @@
     </div>
 
     <div class="card">
-      <h2>יומן היום</h2>
-      <div class="sub">כל הרישומים של היום — אפשר למחוק כל אחד</div>
+      <h2 data-i18n="today_log_title">יומן היום</h2>
+      <div class="sub" data-i18n="today_log_sub">כל הרישומים של היום — אפשר למחוק כל אחד</div>
       <div id="timeline" class="timeline"></div>
     </div>
 
+    <!-- ===== AD SLOT ===== -->
+    <div class="ad-slot" id="adSlot">
+      <div class="ad-label" data-i18n="ad_label">פרסומת</div>
+      <div class="ad-body" id="adBody">
+        <!--
+          מקום לפרסומת. לחיבור רשת פרסום (למשל Google AdSense):
+          1. הירשמו ב-https://www.google.com/adsense וקבלו publisher ID (ca-pub-XXXX).
+          2. הוסיפו בתגית <head> שב-index.html את הסקריפט:
+             <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXX" crossorigin="anonymous"></script>
+          3. החליפו את התוכן כאן ב:
+             <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXX" data-ad-slot="YYYY" data-ad-format="auto" data-full-width-responsive="true"></ins>
+             <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+          עד אז מוצג מציין-מקום.
+        -->
+        <span class="ad-ph" data-i18n="ad_placeholder">מקום לפרסומת</span>
+      </div>
+    </div>
+
     <div class="card">
-      <h2>צבע השתן</h2>
-      <div class="sub">סמן את הצבע הקרוב ביותר בביקור האחרון בשירותים — זה המדד האמין ביותר להידרציה שלך</div>
+      <h2 data-i18n="urine_title">צבע השתן</h2>
+      <div class="sub" data-i18n="urine_sub">סמן את הצבע הקרוב ביותר בביקור האחרון בשירותים — זה המדד האמין ביותר להידרציה שלך</div>
       <div class="urine" id="urineRow"></div>
-      <div class="urine-scale"><span>תקין (1–3)</span><span>שתה עכשיו (6–8)</span></div>
+      <div class="urine-scale"><span data-i18n="urine_ok">תקין (1–3)</span><span data-i18n="urine_drink">שתה עכשיו (6–8)</span></div>
       <div class="urine-msg hidden" id="urineMsg"></div>
     </div>
 
     <div class="card">
-      <h2>אירוע כאב</h2>
-      <div class="sub">תיעוד התקפים עוזר לרופא לזהות דפוסים מול נתוני השתייה</div>
-      <button class="pain-open" id="painOpenBtn" onclick="togglePain(true)">+ תיעוד כאב</button>
+      <h2 data-i18n="pain_title">אירוע כאב</h2>
+      <div class="sub" data-i18n="pain_sub">תיעוד התקפים עוזר לרופא לזהות דפוסים מול נתוני השתייה</div>
+      <button class="pain-open" id="painOpenBtn" onclick="togglePain(true)" data-i18n="pain_add">+ תיעוד כאב</button>
       <div class="pain-form hidden" id="painForm">
-        <div style="font-size:13px;margin-bottom:4px">עוצמה: <b id="painLevelLabel">5</b> / 10</div>
+        <div style="font-size:13px;margin-bottom:4px"><span data-i18n="pain_intensity">עוצמה:</span> <b id="painLevelLabel">5</b> / 10</div>
         <input type="range" min="1" max="10" value="5" id="painRange" oninput="document.getElementById('painLevelLabel').textContent=this.value">
-        <input type="text" id="painNote" placeholder="הערה (מיקום, נסיבות…) — לא חובה">
+        <input type="text" id="painNote" data-i18n-ph="pain_note_ph">
         <div class="pain-actions">
-          <button class="btn-amber" onclick="logPain()">שמירת האירוע</button>
-          <button class="btn-ghost" onclick="togglePain(false)">ביטול</button>
+          <button class="btn-amber" onclick="logPain()" data-i18n="pain_save">שמירת האירוע</button>
+          <button class="btn-ghost" onclick="togglePain(false)" data-i18n="cancel">ביטול</button>
         </div>
       </div>
       <div class="pain-note hidden" id="painSummary"></div>
@@ -125,12 +145,12 @@
   <!-- TRENDS -->
   <div id="view-trends" class="hidden">
     <div class="card">
-      <h2>7 הימים האחרונים</h2>
-      <div class="sub">הקו המקווקו מסמן את היעד</div>
+      <h2 data-i18n="week_title">7 הימים האחרונים</h2>
+      <div class="sub" data-i18n="week_sub">הקו המקווקו מסמן את היעד</div>
       <div class="chart" id="weekChart"></div>
     </div>
     <div class="card">
-      <h2>סיכום 30 יום</h2>
+      <h2 data-i18n="month_title">סיכום 30 יום</h2>
       <div style="height:10px"></div>
       <div class="stats" id="monthStats"></div>
     </div>
@@ -139,60 +159,59 @@
   <!-- REPORT -->
   <div id="view-report" class="hidden">
     <div class="card" id="reportCard">
-      <h2>דוח לרופא המטפל</h2>
-      <div class="sub">סיכום 30 הימים האחרונים — להצגה בביקורת או לשליחה מראש</div>
+      <h2 data-i18n="report_title">דוח לרופא המטפל</h2>
+      <div class="sub" data-i18n="report_sub">סיכום 30 הימים האחרונים — להצגה בביקורת או לשליחה מראש</div>
       <pre class="report" id="reportText"></pre>
       <div class="report-actions">
-        <button class="btn-copy" onclick="copyReport()">העתקת הדוח</button>
-        <button class="btn-copy alt" onclick="window.print()">שמירה כ־PDF / הדפסה</button>
+        <button class="btn-copy" onclick="copyReport()" data-i18n="copy_report">העתקת הדוח</button>
+        <button class="btn-copy alt" onclick="window.print()" data-i18n="save_pdf">שמירה כ־PDF / הדפסה</button>
       </div>
     </div>
-    <div class="disclaimer">
-      היישום מיועד לתיעוד ומעקב בלבד ואינו מהווה ייעוץ רפואי, אבחון או טיפול. יעדי השתייה נקבעים על ידי הרופא המטפל בלבד. במקרה של כאב חריף — פנה לקבלת טיפול רפואי.
-    </div>
+    <div class="disclaimer" data-i18n="disclaimer"></div>
   </div>
 
   <!-- SETTINGS -->
   <div id="view-settings" class="hidden">
     <div class="card">
-      <h2>יעד יומי</h2>
-      <div class="sub">כמות השתייה היומית שנקבעה על ידי הרופא</div>
+      <h2 data-i18n="goal_title">יעד יומי</h2>
+      <div class="sub" data-i18n="goal_sub2">כמות השתייה היומית שנקבעה על ידי הרופא</div>
       <div class="goal-edit">
         <input type="number" id="goalInput" min="500" max="6000" step="100">
-        <span>מ״ל</span>
-        <button class="btn-ghost" onclick="saveGoal()">שמור</button>
+        <span data-i18n="ml">מ״ל</span>
+        <button class="btn-ghost" onclick="saveGoal()" data-i18n="save">שמור</button>
       </div>
     </div>
 
     <div class="card">
-      <h2>גדלי כוסות</h2>
-      <div class="sub">התאם את כפתורי השתייה המהירה (עד 8 גדלים, במ״ל)</div>
+      <h2 data-i18n="cups_title">גדלי כוסות</h2>
+      <div class="sub" data-i18n="cups_sub">התאם את כפתורי השתייה המהירה (עד 8 גדלים, במ״ל)</div>
       <div id="cupsEditor" class="cups-editor"></div>
       <div class="cups-add">
-        <input type="number" id="newCup" min="10" max="3000" step="10" placeholder="למשל 250">
-        <button class="btn-ghost" onclick="addCup()">הוסף גודל</button>
+        <input type="number" id="newCup" min="10" max="3000" step="10" data-i18n-ph="new_cup_ph">
+        <button class="btn-ghost" onclick="addCup()" data-i18n="add_size">הוסף גודל</button>
       </div>
-      <button class="btn-copy" onclick="saveCups()">שמירת הגדלים</button>
+      <button class="btn-copy" onclick="saveCups()" data-i18n="save_cups">שמירת הגדלים</button>
     </div>
 
     <div class="card">
-      <h2>תזכורות שתייה</h2>
-      <div class="sub">קבל התראה לטלפון/מחשב כשלא שתית מספיק — גם כשהאפליקציה סגורה</div>
+      <h2 data-i18n="rem_title">תזכורות שתייה</h2>
+      <div class="sub" data-i18n="rem_sub">קבל התראה כשלא שתית מספיק — גם כשהאפליקציה סגורה</div>
       <label class="toggle-row">
-        <span>הפעל תזכורות</span>
+        <span data-i18n="rem_enable">הפעל תזכורות</span>
         <input type="checkbox" id="remEnabled">
       </label>
       <div class="rem-fields">
-        <div class="rem-field"><span>כל</span><input type="number" id="remInterval" min="30" max="360" step="15"><span>דקות</span></div>
-        <div class="rem-field"><span>משעה</span><input type="number" id="remStart" min="0" max="23"><span>עד שעה</span><input type="number" id="remEnd" min="1" max="24"></div>
+        <div class="rem-field"><span data-i18n="rem_every">כל</span><input type="number" id="remInterval" min="30" max="360" step="15"><span data-i18n="rem_minutes">דקות</span></div>
+        <div class="rem-field"><span data-i18n="rem_from">משעה</span><input type="number" id="remStart" min="0" max="23"><span data-i18n="rem_to">עד שעה</span><input type="number" id="remEnd" min="1" max="24"></div>
       </div>
-      <button class="btn-copy" onclick="saveReminders()">שמירת התזכורות</button>
+      <button class="btn-copy" onclick="saveReminders()" data-i18n="save_rem">שמירת התזכורות</button>
       <div class="rem-note" id="remNote"></div>
     </div>
   </div>
 </div>
 
 <div id="toast"></div>
+<script src="/i18n.js"></script>
 <script src="/app.js"></script>
 </body>
 </html>

@@ -48,16 +48,29 @@ function setAuthCookie(res, token) {
     maxAge: 30 * 24 * 60 * 60 * 1000,
   });
 }
+const LANGS = ["he", "en", "ar", "de", "fr", "es", "hi"];
 const publicUser = (u) => ({
   name: u.name,
   email: u.email,
   goal_ml: u.goal_ml,
   cups: JSON.parse(u.cups),
+  lang: u.lang || "he",
   reminder_enabled: !!u.reminder_enabled,
   reminder_interval_min: u.reminder_interval_min,
   reminder_start: u.reminder_start,
   reminder_end: u.reminder_end,
 });
+
+// localized push text (title, body-template with {remaining})
+const PUSH_TR = {
+  he: { title: "זמן לשתות מים 💧", body: "נותרו {r} ליטר עד היעד היומי. הוסף כוס עכשיו." },
+  en: { title: "Time to drink water 💧", body: "{r} liters left to your daily goal. Add a glass now." },
+  ar: { title: "حان وقت شرب الماء 💧", body: "بقي {r} لتر حتى هدفك اليومي. أضف كوبًا الآن." },
+  de: { title: "Zeit, Wasser zu trinken 💧", body: "Noch {r} Liter bis zum Tagesziel. Jetzt ein Glas hinzufügen." },
+  fr: { title: "Il est temps de boire 💧", body: "Il reste {r} litres avant votre objectif. Ajoutez un verre." },
+  es: { title: "Hora de beber agua 💧", body: "Quedan {r} litros para tu meta diaria. Añade un vaso ahora." },
+  hi: { title: "पानी पीने का समय 💧", body: "दैनिक लक्ष्य तक {r} लीटर बाकी। अभी एक गिलास जोड़ें।" },
+};
 
 function auth(req, res, next) {
   const token = req.cookies.token;
@@ -84,7 +97,7 @@ function rateLimit(req, res, next) {
     return next();
   }
   if (rec.count >= 15)
-    return res.status(429).json({ error: "יותר מדי ניסיונות — נסה שוב בעוד מספר דקות" });
+    return res.status(429).json({ error: "יותר מדי ניסיונות — נסה שוב בעוד מספר דקות", code: "rate" });
   rec.count++;
   next();
 }
@@ -95,9 +108,9 @@ app.post("/api/register", rateLimit, (req, res) => {
   const name = String(req.body.name || "").trim();
   const password = String(req.body.password || "");
   if (!email || !name || password.length < 6)
-    return res.status(400).json({ error: "יש למלא שם, אימייל וסיסמה בת 6 תווים לפחות" });
+    return res.status(400).json({ error: "יש למלא שם, אימייל וסיסמה בת 6 תווים לפחות", code: "fill_fields" });
   if (db.prepare("SELECT id FROM users WHERE email = ?").get(email))
-    return res.status(409).json({ error: "כתובת האימייל כבר רשומה" });
+    return res.status(409).json({ error: "כתובת האימייל כבר רשומה", code: "email_taken" });
 
   const hash = bcrypt.hashSync(password, 10);
   const info = db.prepare("INSERT INTO users (email, name, password_hash) VALUES (?, ?, ?)").run(email, name, hash);
@@ -111,7 +124,7 @@ app.post("/api/login", rateLimit, (req, res) => {
   const password = String(req.body.password || "");
   const row = db.prepare("SELECT * FROM users WHERE email = ?").get(email);
   if (!row || !bcrypt.compareSync(password, row.password_hash))
-    return res.status(401).json({ error: "אימייל או סיסמה שגויים" });
+    return res.status(401).json({ error: "אימייל או סיסמה שגויים", code: "bad_creds" });
   setAuthCookie(res, makeToken(row));
   res.json({ user: publicUser(row) });
 });
@@ -138,13 +151,15 @@ app.put("/api/settings", auth, (req, res) => {
   const interval = Math.max(30, Math.min(360, parseInt(b.reminder_interval_min, 10) || 120));
   const start = Math.max(0, Math.min(23, parseInt(b.reminder_start, 10)));
   const end = Math.max(1, Math.min(24, parseInt(b.reminder_end, 10)));
+  const lang = LANGS.includes(b.lang) ? b.lang : null;
 
   db.prepare(
     `UPDATE users SET
       cups = COALESCE(?, cups),
+      lang = COALESCE(?, lang),
       reminder_enabled = ?, reminder_interval_min = ?, reminder_start = ?, reminder_end = ?
      WHERE id = ?`
-  ).run(cups && cups.length ? JSON.stringify(cups) : null, enabled, interval, start, end, req.user.id);
+  ).run(cups && cups.length ? JSON.stringify(cups) : null, lang, enabled, interval, start, end, req.user.id);
 
   const user = db.prepare("SELECT * FROM users WHERE id = ?").get(req.user.id);
   res.json({ user: publicUser(user) });
@@ -262,7 +277,8 @@ function checkReminders() {
     const row = db.prepare("SELECT COALESCE(SUM(ml),0) AS ml FROM drinks WHERE user_id = ? AND day = ?").get(u.id, day);
     if (row.ml >= u.goal_ml) continue; // goal met, no nag
     const remaining = ((u.goal_ml - row.ml) / 1000).toFixed(1);
-    sendPush(u.id, { title: "זמן לשתות מים 💧", body: `נותרו ${remaining} ליטר עד היעד היומי. הוסף כוס עכשיו.` });
+    const tr = PUSH_TR[u.lang] || PUSH_TR.he;
+    sendPush(u.id, { title: tr.title, body: tr.body.replace("{r}", remaining) });
     db.prepare("UPDATE users SET last_reminder_ts = ? WHERE id = ?").run(now, u.id);
   }
 }

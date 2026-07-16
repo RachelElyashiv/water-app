@@ -118,6 +118,26 @@ button:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
 .insight{background:var(--teal-soft);border-radius:12px;padding:14px;font-size:14px;line-height:1.7;color:var(--ink)}
 .insight-note{font-size:11.5px;color:var(--ink-soft);margin-top:10px;line-height:1.6}
 
+/* ---- onboarding wizard ---- */
+.ob{position:fixed;inset:0;z-index:100;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:20px;overflow-y:auto}
+.ob-card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:24px 22px;max-width:420px;width:100%;text-align:center}
+.ob-dots{display:flex;justify-content:center;gap:7px;margin-bottom:18px}
+.ob-dots span{width:8px;height:8px;border-radius:999px;background:var(--line)}
+.ob-dots span.on{background:var(--teal);width:22px}
+.ob-emoji{font-size:40px;margin-bottom:6px}
+.ob-card h2{font-family:'Frank Ruhl Libre',serif;font-size:22px;margin:0 0 8px}
+.ob-card p{font-size:13.5px;color:var(--ink-soft);line-height:1.7;margin:0 0 16px}
+.ob-field-label{display:block;font-size:12.5px;color:var(--ink-soft);margin-bottom:6px;text-align:start}
+.ob-lang{width:100%}
+.ob-goal{display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:16px;font-size:15px}
+.ob-goal input{width:120px;padding:11px;border-radius:10px;border:1px solid var(--line);font-family:'Heebo',sans-serif;font-size:16px;text-align:center;font-weight:700;color:var(--teal)}
+.ob-calc-hint{font-size:12.5px;color:var(--ink-soft);text-align:start;margin-bottom:10px}
+.ob-card .calc-field{text-align:start}
+.ob-actions{display:flex;align-items:center;gap:8px;margin-top:22px}
+.ob-actions .btn-ghost{min-width:80px}
+.ob-skip{flex:1;background:none;border:none;color:var(--ink-soft);text-decoration:underline;cursor:pointer;font-family:'Heebo',sans-serif;font-size:13px}
+.ob-primary{min-width:96px;padding:11px 16px;border-radius:11px;border:none;background:var(--teal);color:#fff;font-weight:700;font-size:14.5px;cursor:pointer;font-family:'Heebo',sans-serif}
+
 /* ---- timeline ---- */
 .timeline{display:flex;flex-direction:column;gap:6px}
 .tl-empty{font-size:12.5px;color:var(--ink-soft);text-align:center;padding:8px 0}

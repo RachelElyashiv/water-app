@@ -54,8 +54,12 @@ async function submitAuth(e) {
   e.preventDefault();
   $("au-error").textContent = "";
   const payload = { email: $("au-email").value, password: $("au-password").value, name: $("au-name").value };
-  try { const { user } = await api("/" + authMode, "POST", payload); onLoggedIn(user); }
-  catch (err) { $("au-error").textContent = err.message; }
+  try {
+    const mode = authMode;
+    const { user } = await api("/" + mode, "POST", payload);
+    onLoggedIn(user);
+    if (mode === "register") startOnboarding();
+  } catch (err) { $("au-error").textContent = err.message; }
   return false;
 }
 async function logout() { await api("/logout", "POST"); location.reload(); }
@@ -146,21 +150,13 @@ function renderCalcResult() {
     high: (calcData.high / 1000).toFixed(1),
   });
 }
-function calcIntake() {
-  const w = parseInt($("calcWeight").value, 10);
-  if (!w || w < 20 || w > 250) { ping(t("calc_need_weight")); return; }
-  const h = parseInt($("calcHeight").value, 10) || 0;
-  const age = parseInt($("calcAge").value, 10) || 0;
-  const sex = $("calcSex").value; // 'female' | 'male'
-
-  // height (optional): use adjusted body weight so high-BMI bodies aren't over-estimated
-  let bw = w;
-  if (h >= 120) {
-    const ibw = (sex === "male" ? 50 : 45.5) + 0.9 * Math.max(0, h - 152); // Devine ideal weight
-    if (w > ibw) bw = ibw + 0.4 * (w - ibw); // adjusted body weight for higher BMI
+// shared hydration estimate — weight required; height/age/sex optional
+function intakeRange({ weight, height = 0, age = 0, sex = "female", activity = "mid", climate = "temperate" }) {
+  let bw = weight;
+  if (height >= 120) {
+    const ibw = (sex === "male" ? 50 : 45.5) + 0.9 * Math.max(0, height - 152); // Devine ideal weight
+    if (weight > ibw) bw = ibw + 0.4 * (weight - ibw); // adjusted body weight for higher BMI
   }
-
-  // age (optional): ml-per-kg band drops with age
   let lowF = 30, highF = 35;
   if (age >= 10) {
     if (age < 30) { lowF = 32; highF = 37; }
@@ -168,15 +164,26 @@ function calcIntake() {
     else if (age < 65) { lowF = 28; highF = 33; }
     else { lowF = 25; highF = 30; }
   }
-
-  const actAdd = { low: 0, mid: 350, high: 700 }[$("calcActivity").value] || 0;
-  const climAdd = { temperate: 0, hot: 500 }[$("calcClimate").value] || 0;
+  const actAdd = { low: 0, mid: 350, high: 700 }[activity] || 0;
+  const climAdd = { temperate: 0, hot: 500 }[climate] || 0;
   const sexAdd = sex === "male" ? 250 : 0; // higher total body water in men
-
   const low = Math.round(bw * lowF + actAdd + climAdd + sexAdd);
   const high = Math.round(bw * highF + actAdd + climAdd + sexAdd);
   const suggested = Math.min(6000, Math.max(500, Math.round((low + high) / 2 / 100) * 100));
-  calcData = { low, high, suggested };
+  return { low, high, suggested };
+}
+
+function calcIntake() {
+  const w = parseInt($("calcWeight").value, 10);
+  if (!w || w < 20 || w > 250) { ping(t("calc_need_weight")); return; }
+  calcData = intakeRange({
+    weight: w,
+    height: parseInt($("calcHeight").value, 10) || 0,
+    age: parseInt($("calcAge").value, 10) || 0,
+    sex: $("calcSex").value,
+    activity: $("calcActivity").value,
+    climate: $("calcClimate").value,
+  });
   renderCalcResult();
   $("calcResult").classList.remove("hidden");
 }
@@ -443,6 +450,8 @@ function copyReport() {
 function onLangChanged() {
   $("langSelectAuth").value = currentLang;
   $("langSelectApp").value = currentLang;
+  if ($("obLang")) $("obLang").value = currentLang;
+  if (!$("onboarding").classList.contains("hidden")) showObStep();
   if (!$("app-screen").classList.contains("hidden")) {
     renderSettings();
     renderCalcResult();
@@ -450,6 +459,49 @@ function onLangChanged() {
   } else {
     setAuthMode(authMode);
   }
+}
+
+// ---------- onboarding (first-time wizard) ----------
+let obStep = 1;
+const OB_STEPS = 3;
+function startOnboarding() {
+  obStep = 1;
+  initLangSelector($("obLang"));
+  $("obGoal").value = state.goal_ml || 3000;
+  showObStep();
+  $("onboarding").classList.remove("hidden");
+}
+function showObStep() {
+  document.querySelectorAll(".ob-step").forEach((s) => s.classList.toggle("hidden", +s.dataset.step !== obStep));
+  document.querySelectorAll(".ob-dots span").forEach((d, i) => d.classList.toggle("on", i === obStep - 1));
+  $("obBack").style.visibility = obStep === 1 ? "hidden" : "visible";
+  $("obNext").textContent = obStep === OB_STEPS ? t("ob_finish") : t("ob_next");
+}
+function obNav(dir) {
+  if (dir > 0 && obStep === OB_STEPS) { obFinish(false); return; }
+  obStep = Math.min(OB_STEPS, Math.max(1, obStep + dir));
+  showObStep();
+}
+function obCalc() {
+  const w = parseInt($("obWeight").value, 10);
+  if (!w || w < 20 || w > 250) { ping(t("calc_need_weight")); return; }
+  const r = intakeRange({ weight: w, activity: $("obActivity").value, climate: $("obClimate").value });
+  $("obGoal").value = r.suggested;
+  const gi = $("obGoal");
+  gi.classList.remove("flash"); void gi.offsetWidth; gi.classList.add("flash");
+}
+async function obFinish(skipped) {
+  const g = parseInt($("obGoal").value, 10);
+  if (g) { $("goalInput").value = g; await saveGoal(); }
+  if (!skipped && $("obRem").checked) {
+    $("remEnabled").checked = true;
+    $("remInterval").value = $("obInterval").value || 120;
+    $("remStart").value = 8; $("remEnd").value = 22;
+    await saveReminders();
+  }
+  localStorage.setItem("litho-onboarded", "1");
+  $("onboarding").classList.add("hidden");
+  ping(t("ob_done"));
 }
 
 // ---------- install (PWA) ----------

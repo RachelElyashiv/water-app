@@ -266,6 +266,66 @@
   </div>
 </div>
 
+<!-- ================= ONBOARDING ================= -->
+<div id="onboarding" class="ob hidden">
+  <div class="ob-card">
+    <div class="ob-dots"><span></span><span></span><span></span></div>
+
+    <div class="ob-step" data-step="1">
+      <div class="ob-emoji">💧</div>
+      <h2 data-i18n="ob_welcome_title">ברוכים הבאים ל-2.5ל׳</h2>
+      <p data-i18n="ob_welcome_text"></p>
+      <label class="ob-field-label" data-i18n="language">שפה</label>
+      <select id="obLang" class="lang-select ob-lang"></select>
+    </div>
+
+    <div class="ob-step hidden" data-step="2">
+      <div class="ob-emoji">🎯</div>
+      <h2 data-i18n="goal_title">יעד יומי</h2>
+      <p data-i18n="ob_goal_text"></p>
+      <div class="ob-goal">
+        <input type="number" id="obGoal" min="500" max="6000" step="100" value="3000">
+        <span data-i18n="ml">מ״ל</span>
+      </div>
+      <div class="ob-calc-hint" data-i18n="ob_calc_hint">לא יודעת? חשבי לפי משקל:</div>
+      <div class="calc-field">
+        <label for="obWeight" data-i18n="calc_weight">משקל (ק״ג)</label>
+        <input type="number" id="obWeight" min="20" max="250" step="1" placeholder="70">
+      </div>
+      <div class="calc-field">
+        <label for="obActivity" data-i18n="calc_activity">רמת פעילות</label>
+        <select id="obActivity">
+          <option value="low" data-i18n="calc_act_low"></option>
+          <option value="mid" data-i18n="calc_act_mid"></option>
+          <option value="high" data-i18n="calc_act_high"></option>
+        </select>
+      </div>
+      <div class="calc-field">
+        <label for="obClimate" data-i18n="calc_climate">אקלים</label>
+        <select id="obClimate">
+          <option value="temperate" data-i18n="calc_clim_temp"></option>
+          <option value="hot" data-i18n="calc_clim_hot"></option>
+        </select>
+      </div>
+      <button class="btn-ghost" onclick="obCalc()" data-i18n="calc_calc">חשב</button>
+    </div>
+
+    <div class="ob-step hidden" data-step="3">
+      <div class="ob-emoji">🔔</div>
+      <h2 data-i18n="rem_title">תזכורות שתייה</h2>
+      <p data-i18n="rem_sub"></p>
+      <label class="toggle-row"><span data-i18n="rem_enable">הפעל תזכורות</span><input type="checkbox" id="obRem"></label>
+      <div class="rem-field"><span data-i18n="rem_every">כל</span><input type="number" id="obInterval" value="120" min="30" max="360" step="15"><span data-i18n="rem_minutes">דקות</span></div>
+    </div>
+
+    <div class="ob-actions">
+      <button class="btn-ghost" id="obBack" onclick="obNav(-1)" data-i18n="ob_back">הקודם</button>
+      <button class="ob-skip" onclick="obFinish(true)" data-i18n="ob_skip">דלג</button>
+      <button class="ob-primary" id="obNext" onclick="obNav(1)">הבא</button>
+    </div>
+  </div>
+</div>
+
 <div id="toast"></div>
 <script src="/i18n.js"></script>
 <script src="/app.js"></script>

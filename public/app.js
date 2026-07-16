@@ -354,6 +354,8 @@ function render() {
     { v: painEvents, l: t("stat_pain") },
   ].map((s) => `<div class="stat"><div class="v">${s.v}</div><div class="l">${s.l}</div></div>`).join("");
 
+  renderInsights(month, GOAL);
+
   window._report =
 `${t("report_title")} — ${t("month_title")}
 ${t("name")}: ${state.name}
@@ -364,6 +366,48 @@ ${t("stat_goal_days")}: ${goalDays}/30
 ${t("stat_urine_avg")}: ${avgU ?? "—"}
 ${t("stat_pain")}: ${painEvents}`;
   $("reportText").textContent = window._report;
+}
+
+// hydration-vs-pain insight: monthly calendar heatmap + comparison
+function renderInsights(month, GOAL) {
+  // --- calendar heatmap ---
+  const cal = $("monthCalendar");
+  const parse = (k) => { const [y, mo, da] = k.split("-").map(Number); return new Date(y, mo - 1, da); };
+  const wkBase = new Date(2023, 0, 1); // a Sunday
+  let html = '<div class="cal-grid">';
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(wkBase); d.setDate(wkBase.getDate() + i);
+    html += `<div class="cal-h">${weekdayShort(d)}</div>`;
+  }
+  const offset = parse(month[0].key).getDay();
+  for (let i = 0; i < offset; i++) html += '<div class="cal-cell empty"></div>';
+  month.forEach((d) => {
+    const dt = parse(d.key);
+    const ratio = GOAL > 0 ? d.intake / GOAL : 0;
+    const hasPain = d.pain.length > 0;
+    let cls = "cal-cell", style = "";
+    if (d.intake <= 0) cls += " none";
+    else if (ratio >= 1) cls += " full";
+    else { style = ` style="background:rgba(79,179,199,${(0.3 + 0.6 * Math.min(ratio, 1)).toFixed(2)})"`; }
+    if (hasPain) cls += " has-pain";
+    html += `<div class="${cls}"${style} title="${d.key}${hasPain ? " ⚠" : ""}"><span class="cal-day">${dt.getDate()}</span>${hasPain ? '<span class="cal-pain">⚠</span>' : ""}</div>`;
+  });
+  html += "</div>";
+  cal.innerHTML = html;
+
+  // --- comparison ---
+  const painDays = month.filter((d) => d.pain.length > 0 && d.intake > 0);
+  const noPainDays = month.filter((d) => d.pain.length === 0 && d.intake > 0);
+  const totalPain = month.reduce((s, d) => s + d.pain.length, 0);
+  let text;
+  if (totalPain === 0) text = t("insight_no_pain");
+  else if (!painDays.length || !noPainDays.length) text = t("insight_need");
+  else {
+    const a = (painDays.reduce((s, d) => s + d.intake, 0) / painDays.length / 1000).toFixed(1);
+    const b = (noPainDays.reduce((s, d) => s + d.intake, 0) / noPainDays.length / 1000).toFixed(1);
+    text = t("insight_compare", { a, b }) + " " + (parseFloat(a) < parseFloat(b) ? t("insight_less") : t("insight_none_lnk"));
+  }
+  $("insightText").textContent = text;
 }
 
 function renderTimeline() {

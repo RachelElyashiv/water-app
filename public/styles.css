@@ -104,6 +104,20 @@ button:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
 .calc-result .btn-copy{margin-top:0}
 .calc-note{font-size:11.5px;color:var(--ink-soft);margin-top:10px;line-height:1.6;text-align:center}
 
+/* ---- monthly calendar + insight ---- */
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.cal-h{font-size:10px;color:var(--ink-soft);text-align:center;padding-bottom:2px}
+.cal-cell{position:relative;aspect-ratio:1;border-radius:6px;background:var(--bg);border:1px solid var(--line);display:flex;align-items:center;justify-content:center}
+.cal-cell.empty{background:transparent;border:none}
+.cal-cell.none{background:var(--bg)}
+.cal-cell.full{background:var(--good);border-color:var(--good)}
+.cal-cell.full .cal-day{color:#fff}
+.cal-cell.has-pain{border:2px solid var(--amber)}
+.cal-day{font-size:10px;color:var(--ink)}
+.cal-pain{position:absolute;top:0;inset-inline-end:1px;font-size:9px;line-height:1;color:var(--amber)}
+.insight{background:var(--teal-soft);border-radius:12px;padding:14px;font-size:14px;line-height:1.7;color:var(--ink)}
+.insight-note{font-size:11.5px;color:var(--ink-soft);margin-top:10px;line-height:1.6}
+
 /* ---- timeline ---- */
 .timeline{display:flex;flex-direction:column;gap:6px}
 .tl-empty{font-size:12.5px;color:var(--ink-soft);text-align:center;padding:8px 0}

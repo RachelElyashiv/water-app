@@ -149,10 +149,32 @@ function renderCalcResult() {
 function calcIntake() {
   const w = parseInt($("calcWeight").value, 10);
   if (!w || w < 20 || w > 250) { ping(t("calc_need_weight")); return; }
+  const h = parseInt($("calcHeight").value, 10) || 0;
+  const age = parseInt($("calcAge").value, 10) || 0;
+  const sex = $("calcSex").value; // 'female' | 'male'
+
+  // height (optional): use adjusted body weight so high-BMI bodies aren't over-estimated
+  let bw = w;
+  if (h >= 120) {
+    const ibw = (sex === "male" ? 50 : 45.5) + 0.9 * Math.max(0, h - 152); // Devine ideal weight
+    if (w > ibw) bw = ibw + 0.4 * (w - ibw); // adjusted body weight for higher BMI
+  }
+
+  // age (optional): ml-per-kg band drops with age
+  let lowF = 30, highF = 35;
+  if (age >= 10) {
+    if (age < 30) { lowF = 32; highF = 37; }
+    else if (age < 55) { lowF = 30; highF = 35; }
+    else if (age < 65) { lowF = 28; highF = 33; }
+    else { lowF = 25; highF = 30; }
+  }
+
   const actAdd = { low: 0, mid: 350, high: 700 }[$("calcActivity").value] || 0;
   const climAdd = { temperate: 0, hot: 500 }[$("calcClimate").value] || 0;
-  const low = w * 30 + actAdd + climAdd;
-  const high = w * 35 + actAdd + climAdd;
+  const sexAdd = sex === "male" ? 250 : 0; // higher total body water in men
+
+  const low = Math.round(bw * lowF + actAdd + climAdd + sexAdd);
+  const high = Math.round(bw * highF + actAdd + climAdd + sexAdd);
   const suggested = Math.min(6000, Math.max(500, Math.round((low + high) / 2 / 100) * 100));
   calcData = { low, high, suggested };
   renderCalcResult();

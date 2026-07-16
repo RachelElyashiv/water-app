@@ -1,4 +1,4 @@
-const CACHE = "litho-v2";
+const CACHE = "litho-v3";
 const ASSETS = ["/", "/index.html", "/styles.css", "/app.js", "/i18n.js", "/manifest.json", "/icon-192.png", "/icon-512.png"];
 
 self.addEventListener("install", (e) => {
@@ -11,20 +11,24 @@ self.addEventListener("activate", (e) => {
   );
 });
 
-// network-first for API, cache-first for static assets
+// network-first so app updates appear immediately when online; cache is offline fallback
 self.addEventListener("fetch", (e) => {
-  const url = new URL(e.request.url);
-  if (e.request.method !== "GET") return;
+  const req = e.request;
+  if (req.method !== "GET") return;
+  const url = new URL(req.url);
+  if (url.origin !== self.location.origin) return; // let cross-origin (fonts, ads) pass through
   if (url.pathname.startsWith("/api/")) {
-    e.respondWith(fetch(e.request).catch(() => new Response(JSON.stringify({ error: "אין חיבור לרשת" }), { status: 503, headers: { "Content-Type": "application/json" } })));
+    e.respondWith(fetch(req).catch(() => new Response(JSON.stringify({ error: "אין חיבור לרשת" }), { status: 503, headers: { "Content-Type": "application/json" } })));
     return;
   }
   e.respondWith(
-    caches.match(e.request).then((cached) => cached || fetch(e.request).then((res) => {
-      const copy = res.clone();
-      caches.open(CACHE).then((c) => c.put(e.request, copy));
-      return res;
-    }).catch(() => caches.match("/")))
+    fetch(req)
+      .then((res) => {
+        const copy = res.clone();
+        caches.open(CACHE).then((c) => c.put(req, copy));
+        return res;
+      })
+      .catch(() => caches.match(req).then((m) => m || caches.match("/")))
   );
 });
 

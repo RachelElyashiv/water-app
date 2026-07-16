@@ -96,6 +96,7 @@ button:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
 .calc-field{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px;font-size:13.5px}
 .calc-field label{color:var(--ink-soft)}
 .calc-field input,.calc-field select{padding:9px 10px;border-radius:9px;border:1px solid var(--line);font-family:'Heebo',sans-serif;font-size:13.5px;min-width:130px}
+.calc-hint{font-size:11.5px;color:var(--ink-soft);opacity:.85;margin:2px 0 10px}
 .calc-result{margin-top:14px;background:var(--teal-soft);border-radius:12px;padding:14px}
 .calc-range{font-family:'Frank Ruhl Libre',serif;font-weight:900;font-size:19px;color:var(--teal);text-align:center;margin-bottom:10px}
 .calc-result .btn-copy{margin-top:0}

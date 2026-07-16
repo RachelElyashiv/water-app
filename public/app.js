@@ -184,6 +184,10 @@ async function applyCalcToGoal() {
   if (!calcData) return;
   $("goalInput").value = calcData.suggested;
   await saveGoal();
+  // make the change unmistakable: scroll to the goal field and flash it
+  const gi = $("goalInput");
+  gi.scrollIntoView({ behavior: "smooth", block: "center" });
+  gi.classList.remove("flash"); void gi.offsetWidth; gi.classList.add("flash");
 }
 
 // ---------- settings: reminders ----------

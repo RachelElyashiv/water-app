@@ -97,6 +97,8 @@ button:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
 .calc-field label{color:var(--ink-soft)}
 .calc-field input,.calc-field select{padding:9px 10px;border-radius:9px;border:1px solid var(--line);font-family:'Heebo',sans-serif;font-size:13.5px;min-width:130px}
 .calc-hint{font-size:11.5px;color:var(--ink-soft);opacity:.85;margin:2px 0 10px}
+@keyframes flashbg{0%{background:var(--good);color:#fff}60%{background:var(--good);color:#fff}100%{background:#fff;color:var(--ink)}}
+.flash{animation:flashbg 1.3s ease}
 .calc-result{margin-top:14px;background:var(--teal-soft);border-radius:12px;padding:14px}
 .calc-range{font-family:'Frank Ruhl Libre',serif;font-weight:900;font-size:19px;color:var(--teal);text-align:center;margin-bottom:10px}
 .calc-result .btn-copy{margin-top:0}

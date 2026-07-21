@@ -461,6 +461,19 @@ function onLangChanged() {
   }
 }
 
+// ---------- theme (light / dark) ----------
+function currentTheme() { return document.documentElement.getAttribute("data-theme") || "light"; }
+function updateThemeIcons() {
+  const icon = currentTheme() === "dark" ? "☀️" : "🌙";
+  ["themeAuth", "themeApp"].forEach((id) => { const b = $(id); if (b) b.textContent = icon; });
+}
+function toggleTheme() {
+  const next = currentTheme() === "dark" ? "light" : "dark";
+  document.documentElement.setAttribute("data-theme", next);
+  localStorage.setItem("litho-theme", next);
+  updateThemeIcons();
+}
+
 // ---------- onboarding (first-time wizard) ----------
 let obStep = 1;
 const OB_STEPS = 3;
@@ -539,6 +552,7 @@ if ("serviceWorker" in navigator) navigator.serviceWorker.register("/sw.js").cat
 initLangSelector($("langSelectAuth"));
 initLangSelector($("langSelectApp"));
 applyStaticTranslations();
+updateThemeIcons();
 
 (async function init() {
   try { const { user } = await api("/me"); onLoggedIn(user); }
